@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Color Palette</title>
+  </head>
+  <body>
+    <section>
+      <div class="bigColorContainer">
+        <div class="smallColorContainer1">
+          <div class="colorDisplayBox"></div>
+          <div class="textContainer">
+            <div class="hexValue">HEX: <span></span></div>
+            <div class="rgbValue">RGB: <span></span></div>
+            <div class="hslValue">HSL: <span></span></div>
+          </div>
+        </div>
+        <div class="smallColorContainer2">
+          <div class="colorDisplayBox"></div>
+          <div class="textContainer">
+            <div class="hexValue">HEX: <span></span></div>
+            <div class="rgbValue">RGB: <span></span></div>
+            <div class="hslValue">HSL: <span></span></div>
+          </div>
+        </div>
+        <div class="smallColorContainer3">
+          <div class="colorDisplayBox">
+            <div class="triangle"></div>
+          </div>
+          <div class="textContainer">
+            <div class="hexValue">HEX: <span></span></div>
+            <div class="rgbValue">RGB: <span></span></div>
+            <div class="hslValue">HSL: <span></span></div>
+          </div>
+        </div>
+        <div class="smallColorContainer4">
+          <div class="colorDisplayBox"></div>
+          <div class="textContainer">
+            <div class="hexValue">HEX: <span></span></div>
+            <div class="rgbValue">RGB: <span></span></div>
+            <div class="hslValue">HSL: <span></span></div>
+          </div>
+        </div>
+        <div class="smallColorContainer5">
+          <div class="colorDisplayBox"></div>
+          <div class="textContainer">
+            <div class="hexValue">HEX: <span></span></div>
+            <div class="rgbValue">RGB: <span></span></div>
+            <div class="hslValue">HSL: <span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="choiceContainer">
+        <label for="drop">Harmony:</label>
+        <select name="drop" id="drop">
+          <option value="Analogous">Analogous</option>
+          <option value="Monochromatic">Monochromatic</option>
+          <option value="Triad">Triad</option>
+          <option value="Complementary">Complementary</option>
+          <option value="Complementary">Compound</option>
+          <option value="Shades">Shades</option>
+        </select>
+        <label for="color">Color:</label>
+        <input name="color" type="color" class="colorPicker" />
+      </div>
+      <div class="explanationContainer">
+        <ol>
+          <li>Pick your harmony</li>
+          <li>Pick your main color</li>
+          <li>Enjoy your new color palette</li>
+        </ol>
+      </div>
+    </section>
+  </body>
+  <script src="script.js"></script>
+</html>
