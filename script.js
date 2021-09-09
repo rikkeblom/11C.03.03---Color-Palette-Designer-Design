@@ -23,9 +23,21 @@ function start() {
   const HSLValue = RGBtoHSL(rgbValue);
   const CSSValue = RGBtoCSS(rgbValue);
   const HEXValue = RGBtoHEX(rgbValue);
-  displayColor(HEXValue);
+
+  //making the four color object copies in the global array
+  //then adjusting according to the fallback harmony choice
+  //and splicing in the random initial color
+  for (let i = 0; i < 4; i++) {
+    globalColorStorageArray[i] = Object.assign({}, HSLValue);
+  }
+  analogousHarmony();
+  globalColorStorageArray.splice(2, 0, HSLValue);
+
+  //setting the color picker to start at the random initial color
   document.querySelector(".colorPicker").value = HEXValue;
+  //displaying the initial color
   displayColorValues(HEXValue, CSSValue, HSLValue);
+  displayColor(HEXValue);
 
   //setting event listeners on the color picker and the harmony dropdown
   document.querySelector(".colorPicker").addEventListener("change", newColorHarmony);
@@ -52,7 +64,6 @@ function newColorHarmony() {
 
   //making the four color object copies in the global array
   for (let i = 0; i < 4; i++) {
-    console.log("Hello");
     globalColorStorageArray[i] = Object.assign({}, HSLValue);
   }
 
@@ -65,10 +76,9 @@ function newColorHarmony() {
     analogousHarmony();
   }
   //I will add an else if for each of the 6 harmony types
-  console.log(globalColorStorageArray);
   globalColorStorageArray.splice(2, 0, HSLValue);
-  console.log(globalColorStorageArray);
-  //Then I am thinking to add in the original color to the global array as globalColorStorageArray.splice(2,0,HSLValue)
+  console.table(globalColorStorageArray);
+
   //Then I want to loop through all the HSL values and convert them to RGB, CSS and HEX
   //Then I want to send those to another function to display them in the corresponding square
 }
@@ -83,13 +93,22 @@ function analogousHarmony() {
   //console.log("analogousHarmony()");
   //H is shifted some degrees for each color - you decide how many degrees, it isn't adjustable by the user. S and L are kept constant
 
-  //I still need to use the remainder thing we learned today (09.09.21) to make sure h never goes over 360
   globalColorStorageArray[0].h = globalColorStorageArray[0].h + 15;
   globalColorStorageArray[1].h = globalColorStorageArray[1].h + 90;
   globalColorStorageArray[2].h = globalColorStorageArray[2].h + 30;
-  globalColorStorageArray[3].h = globalColorStorageArray[3].h + 100;
+  globalColorStorageArray[3].h = globalColorStorageArray[3].h + 200;
 
-  console.log(globalColorStorageArray);
+  //here I use remainder in a loop to make sure h is never below 0 or above 360
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].h > 360) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h - 360;
+    }
+    while (globalColorStorageArray[i].h < 0) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h + 360;
+    }
+    globalColorStorageArray[i].h = globalColorStorageArray[i].h % 360;
+  }
+  console.table(globalColorStorageArray);
 }
 
 //----------------------------Convertion of color values
