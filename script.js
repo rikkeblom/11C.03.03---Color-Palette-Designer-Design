@@ -1,18 +1,16 @@
 "use strict";
-//use (a) global(s) object to save the 5 colors
-//splice can add the main color in as color#3 in the end
+//STILL TO DO:
+// - reworking the random color function at load so the values are stored in the globalColorStorageArray
+//   and can be sent through the same system as the manually picked colors
+// - adjusting the values until I like them
+// - tidying up the code and maybe adding more comments
 
 window.addEventListener("DOMContentLoaded", start);
 
 //setting global color storage array and a template object for storing the HSL info
 //I should make 4 copies of the original picked HSL and then edit each copy depending on the harmony
-//then at the end I can insert the original in the 3rd spot and loop through them to get rgb and hex and display it all
+//then at the end I can insert the original in the 3rd spot with splice and loop through them to get rgb and hex and display it all
 let globalColorStorageArray = [];
-const HSLObject = {
-  h: 0,
-  s: 0,
-  l: 0,
-};
 
 //--------------------------
 
@@ -34,10 +32,10 @@ function start() {
   globalColorStorageArray.splice(2, 0, HSLValue);
 
   //setting the color picker to start at the random initial color
-  document.querySelector(".colorPicker").value = HEXValue;
+  //   document.querySelector(".colorPicker").value = HEXValue;
   //displaying the initial color
-  displayColorValues(HEXValue, CSSValue, HSLValue);
-  displayColor(HEXValue);
+  //   displayColorValues(HEXValue, CSSValue, HSLValue);
+  //   displayColor(HEXValue);
 
   //setting event listeners on the color picker and the harmony dropdown
   document.querySelector(".colorPicker").addEventListener("change", newColorHarmony);
@@ -54,33 +52,47 @@ function randomColor() {
 }
 
 function newColorHarmony() {
+  //resetting the globalarray each time a value is changed
   globalColorStorageArray = [];
 
-  //   console.log("newColorHarmony()");
   const hexValue = document.querySelector(".colorPicker").value;
   const rgbValue = HEXtoRGB(hexValue);
   const HSLValue = RGBtoHSL(rgbValue);
   const CSSValue = RGBtoCSS(rgbValue);
+  console.log(hexValue);
 
   //making the four color object copies in the global array
   for (let i = 0; i < 4; i++) {
     globalColorStorageArray[i] = Object.assign({}, HSLValue);
   }
 
-  displayColor(hexValue);
-  displayColorValues(hexValue, CSSValue, HSLValue);
-  console.log(getHarmonyType());
+  //   displayColor(hexValue);
+  //   displayColorValues(hexValue, CSSValue, HSLValue);
+  //   console.log(getHarmonyType());
 
   if (getHarmonyType() === "Analogous") {
-    //this function updates the global array so the H value of each item shifts a bit
     analogousHarmony();
+  } else if (getHarmonyType() === "Monochromatic") {
+    monochromaticHarmony();
+  } else if (getHarmonyType() === "Triad") {
+    triadHarmony();
+  } else if (getHarmonyType() === "Complementary") {
+    complementaryHarmony();
+  } else if (getHarmonyType() === "Compound") {
+    compoundHarmony();
+  } else if (getHarmonyType() === "Shades") {
+    shadesHarmony();
   }
+
   //I will add an else if for each of the 6 harmony types
   globalColorStorageArray.splice(2, 0, HSLValue);
-  console.table(globalColorStorageArray);
 
   //Then I want to loop through all the HSL values and convert them to RGB, CSS and HEX
+  translateValues();
+
   //Then I want to send those to another function to display them in the corresponding square
+  displayColor();
+  displayColorValues();
 }
 
 function getHarmonyType() {
@@ -108,10 +120,143 @@ function analogousHarmony() {
     }
     globalColorStorageArray[i].h = globalColorStorageArray[i].h % 360;
   }
-  console.table(globalColorStorageArray);
+  //   console.table(globalColorStorageArray);
+}
+
+function monochromaticHarmony() {
+  //H is kept constant, each color has either more S, less S, more L or less L (only one change on each color).
+  globalColorStorageArray[0].s = globalColorStorageArray[0].s - 30;
+  globalColorStorageArray[1].s = globalColorStorageArray[1].s + 30;
+  globalColorStorageArray[2].l = globalColorStorageArray[2].l - 30;
+  globalColorStorageArray[3].l = globalColorStorageArray[3].l + 30;
+
+  //here I use remainder in a loop to make sure s is never below 0 or above 100
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].s > 100) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s - 100;
+    }
+    while (globalColorStorageArray[i].s < 0) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s + 100;
+    }
+    globalColorStorageArray[i].s = globalColorStorageArray[i].s % 100;
+  }
+  //here I use remainder in a loop to make sure s is never below 0 or above 100
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].l > 100) {
+      globalColorStorageArray[i].l = globalColorStorageArray[i].l - 100;
+    }
+    while (globalColorStorageArray[i].l < 0) {
+      globalColorStorageArray[i].l = globalColorStorageArray[i].l + 100;
+    }
+    globalColorStorageArray[i].l = globalColorStorageArray[i].l % 100;
+  }
+}
+
+function triadHarmony() {
+  //Two colors are shifted 60 or 120 degrees from the base.
+  //You decide what to do with the two remaining colors. Usually also shifting them, and adjusting the L is prefered.
+  globalColorStorageArray[0].h = globalColorStorageArray[0].h + 60;
+  globalColorStorageArray[1].h = globalColorStorageArray[1].h + 120;
+  globalColorStorageArray[2].h = globalColorStorageArray[2].h - 60;
+  globalColorStorageArray[3].h = globalColorStorageArray[3].h - 120;
+
+  //here I use remainder in a loop to make sure h is never below 0 or above 360
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].h > 360) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h - 360;
+    }
+    while (globalColorStorageArray[i].h < 0) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h + 360;
+    }
+    globalColorStorageArray[i].h = globalColorStorageArray[i].h % 360;
+  }
+}
+
+function complementaryHarmony() {
+  //One color is at 180 degrees from the base. You decide how to handle the other three!
+  globalColorStorageArray[0].h = globalColorStorageArray[0].h + 180;
+  globalColorStorageArray[0].s = globalColorStorageArray[0].s + 30;
+  globalColorStorageArray[1].h = globalColorStorageArray[1].h + 180;
+  globalColorStorageArray[2].s = globalColorStorageArray[2].s + 30;
+  globalColorStorageArray[3].s = globalColorStorageArray[3].s + 60;
+
+  //here I use remainder in a loop to make sure s is never below 0 or above 100
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].s > 100) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s - 100;
+    }
+    while (globalColorStorageArray[i].s < 0) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s + 100;
+    }
+    globalColorStorageArray[i].s = globalColorStorageArray[i].s % 100;
+  }
+  //here I use remainder in a loop to make sure h is never below 0 or above 360
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].h > 360) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h - 360;
+    }
+    while (globalColorStorageArray[i].h < 0) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h + 360;
+    }
+    globalColorStorageArray[i].h = globalColorStorageArray[i].h % 360;
+  }
+}
+
+function compoundHarmony() {
+  //A combination of complementary and analogous - you decide how many colors are complementary, and how many are analogous
+  globalColorStorageArray[0].h = globalColorStorageArray[0].h + 15;
+  globalColorStorageArray[1].h = globalColorStorageArray[1].h + 90;
+  globalColorStorageArray[2].h = globalColorStorageArray[0].h + 180;
+  globalColorStorageArray[2].s = globalColorStorageArray[0].s + 30;
+  globalColorStorageArray[3].h = globalColorStorageArray[1].h + 180;
+  //here I use remainder in a loop to make sure s is never below 0 or above 100
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].s > 100) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s - 100;
+    }
+    while (globalColorStorageArray[i].s < 0) {
+      globalColorStorageArray[i].s = globalColorStorageArray[i].s + 100;
+    }
+    globalColorStorageArray[i].s = globalColorStorageArray[i].s % 100;
+  }
+  //here I use remainder in a loop to make sure h is never below 0 or above 360
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].h > 360) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h - 360;
+    }
+    while (globalColorStorageArray[i].h < 0) {
+      globalColorStorageArray[i].h = globalColorStorageArray[i].h + 360;
+    }
+    globalColorStorageArray[i].h = globalColorStorageArray[i].h % 360;
+  }
+}
+
+function shadesHarmony() {
+  //H is kept constant, a so is S, but L varies for each color.
+  globalColorStorageArray[0].l = globalColorStorageArray[0].l + 15;
+  globalColorStorageArray[1].l = globalColorStorageArray[1].l + 30;
+  globalColorStorageArray[2].l = globalColorStorageArray[2].l + 45;
+  globalColorStorageArray[3].l = globalColorStorageArray[3].l + 70;
+
+  for (let i = 0; i < 4; i++) {
+    while (globalColorStorageArray[i].l > 100) {
+      globalColorStorageArray[i].l = globalColorStorageArray[i].l - 100;
+    }
+    while (globalColorStorageArray[i].l < 0) {
+      globalColorStorageArray[i].l = globalColorStorageArray[i].l + 100;
+    }
+    globalColorStorageArray[i].l = globalColorStorageArray[i].l % 100;
+  }
 }
 
 //----------------------------Convertion of color values
+function translateValues() {
+  for (let i = 0; i < 5; i++) {
+    globalColorStorageArray[i].hex = RGBtoHEX({ r: HSLtoRGB(globalColorStorageArray[i]).r, g: HSLtoRGB(globalColorStorageArray[i]).g, b: HSLtoRGB(globalColorStorageArray[i]).b });
+    globalColorStorageArray[i].css = RGBtoCSS({ r: HSLtoRGB(globalColorStorageArray[i]).r, g: HSLtoRGB(globalColorStorageArray[i]).g, b: HSLtoRGB(globalColorStorageArray[i]).b });
+  }
+  console.table(globalColorStorageArray);
+}
 
 function HEXtoRGB(hexvalue) {
   //we recieve the value of HEX through the parameter
@@ -255,14 +400,16 @@ function HSLtoRGB(hslvalue) {
 
 //----------------------------Display
 
-function displayColor(color) {
-  //this should be edited so it can display the color for each color instead of only the main
-  document.querySelector(".smallColorContainer3 .colorDisplayBox").style.backgroundColor = color;
+function displayColor() {
+  for (let i = 0; i < 5; i++) {
+    document.querySelector(`.smallColorContainer${i + 1} .colorDisplayBox`).style.backgroundColor = globalColorStorageArray[i].hex;
+  }
 }
 
-function displayColorValues(HEX, RGB, HSL) {
-  //this should be edited so it can display the values for each color instead of only the main
-  document.querySelector(".smallColorContainer3 .hexValue span").textContent = HEX;
-  document.querySelector(".smallColorContainer3 .rgbValue span").textContent = RGB;
-  document.querySelector(".smallColorContainer3 .hslValue span").textContent = `${HSL.h}°, ${HSL.s}%, ${HSL.l}%`;
+function displayColorValues() {
+  for (let i = 0; i < 5; i++) {
+    document.querySelector(`.smallColorContainer${i + 1} .hexValue span`).textContent = globalColorStorageArray[i].hex;
+    document.querySelector(`.smallColorContainer${i + 1} .rgbValue span`).textContent = globalColorStorageArray[i].css;
+    document.querySelector(`.smallColorContainer${i + 1} .hslValue span`).textContent = `${globalColorStorageArray[i].h}°, ${globalColorStorageArray[i].s}%, ${globalColorStorageArray[i].l}%`;
+  }
 }
